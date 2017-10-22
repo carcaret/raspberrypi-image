@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  hub:
+    build: ./docker
+    image: home-hub:latest
+    ports: 
+      - "80:80"
+    volumes:
+      - ./uwsgi:/etc/uwsgi
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/sites-enabled:/etc/nginx/sites-enabled
+      - ./nginx/other-protocols:/etc/nginx/other-protocols
+      - ./home_hub:/opt/app
+

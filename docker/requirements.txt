@@ -1,0 +1,5 @@
+django==1.11.4
+uwsgi==2.0.15
+asgiref==1.1.2
+asgi_redis==1.4.3
+channels==1.1.5

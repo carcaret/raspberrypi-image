@@ -1,0 +1,4 @@
+**/.DS_Store
+home_hub
+nginx/certs/server/*
+nginx/sites-enabled/home_hub
