@@ -1,13 +1,12 @@
-FROM raspbian/jessie
+FROM resin/rpi-raspbian:latest
 
 LABEL maintainer "carcaret"
 
 # UPDATE
-RUN apt-get update && \
-    rm raspberrypi.gpg.key
+RUN apt-get update
 
 # TOOLS
-RUN apt-get -y install build-essential git
+RUN apt-get -y install build-essential git alsa-utils net-tools wget
 
 # NGINX
 RUN apt-get -y install libssl-dev nginx && \
@@ -29,14 +28,19 @@ RUN apt-get -y install libssl-dev nginx && \
     touch /var/cache/nginx/client_temp && \
     adduser --no-create-home nginx
 
-#LIBAV (FFMPEG)
-RUN apt-get -y install libav-tools && \
-    echo "alias ffmpeg=avconv" >> ~/.bashrc
+# FFMPEG
+RUN git clone https://github.com/FFmpeg/FFmpeg.git && \
+    cd FFmpeg && \
+    ./configure --arch=armel --target-os=linux --enable-gpl --enable-nonfree && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -rf FFmpeg
 
 COPY make_dirs.sh .
 
 # PICAM
-RUN apt-get -y install libharfbuzz0b libfontconfig1 && \
+RUN apt-get -y install libharfbuzz0b libfontconfig1 libasound2 && \
     chmod +x make_dirs.sh && \
     ./make_dirs.sh && \
     wget https://github.com/iizukanao/picam/releases/download/v1.4.6/picam-1.4.6-binary-jessie.tar.xz && \
@@ -47,6 +51,16 @@ RUN apt-get -y install libharfbuzz0b libfontconfig1 && \
     ln -s /opt/picam/picam /usr/local/bin/picam && \
     rm -rf picam-1.4.6-binary-jessie && \
     rm make_dirs.sh
+
+# SYMLINKS
+RUN ln -s /opt/vc/lib/libopenmaxil.so /usr/lib/libopenmaxil.so && \
+    ln -s /opt/vc/lib/libbcm_host.so /usr/lib/libbcm_host.so && \
+    ln -s /opt/vc/lib/libvcos.so /usr/lib/libvcos.so &&  \
+    ln -s /opt/vc/lib/libvchiq_arm.so /usr/lib/libvchiq_arm.so && \
+    ln -s /opt/vc/lib/libbrcmGLESv2.so /usr/lib/libbrcmGLESv2.so && \
+    ln -s /opt/vc/lib/libbrcmEGL.so /usr/lib/libbrcmEGL.so && \
+    ln -s /opt/vc/lib/libGLESv2.so /usr/lib/libGLESv2.so && \
+    ln -s /opt/vc/lib/libEGL.so /usr/lib/libEGL.so
 
 COPY requirements.txt .
 
